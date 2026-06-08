@@ -1,0 +1,520 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;background:var(--color-background-tertiary);color:var(--color-text-primary);font-size:14px}
+.tab-bar{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);position:sticky;top:0;z-index:50}
+.tab-btn{flex:1;padding:11px 4px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:400;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:all 0.15s}
+.tab-btn.active{font-weight:500;color:#1e40af;border-bottom-color:#1e40af}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;padding:12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.card.done{border-color:#93c5fd}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px}
+.badge-game{background:#dbeafe;color:#1e40af}
+.badge-win{background:#dcfce7;color:#15803d}
+.badge-draw{background:#fef9c3;color:#854d0e}
+.team-box{flex:1;text-align:center;border-radius:8px;padding:9px 6px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);transition:background 0.15s,border-color 0.15s}
+.team-box.won{background:#f0fdf4;border-color:#86efac}
+.player-tag{display:inline-block;font-size:10px;font-weight:500;padding:1px 5px;border-radius:4px;margin-right:2px}
+.t1-tag{background:#dbeafe;color:#1e40af}
+.t2-tag{background:#ede9fe;color:#5b21b6}
+.score-row{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
+.score-input{width:46px;height:40px;text-align:center;font-size:20px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none;font-family:inherit;transition:border-color 0.15s}
+.score-input:focus{border-color:#3b82f6}
+.score-input.win-score{border-color:#86efac;color:#15803d}
+.btn-15{height:40px;padding:0 8px;font-size:12px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;font-family:inherit;transition:all 0.12s;white-space:nowrap}
+.btn-15:hover{background:#dbeafe;border-color:#93c5fd;color:#1e40af}
+.btn-15.active-15{background:#1e40af;border-color:#1e40af;color:white}
+.vs-text{font-size:11px;color:var(--color-text-tertiary);font-weight:500;min-width:24px;text-align:center}
+.standings-table{width:100%;border-collapse:collapse}
+.standings-table th{background:#1e3a8a;color:white;padding:9px 10px;font-size:11px;font-weight:500;text-align:center}
+.standings-table th:nth-child(2){text-align:left}
+.standings-table td{padding:11px 10px;font-size:13px;text-align:center;border-bottom:0.5px solid var(--color-border-tertiary)}
+.standings-table td:nth-child(2){text-align:left}
+.standings-table tr.gold{background:#fefce8}
+.standings-table tr:hover{background:var(--color-background-secondary)}
+.rank-medal{font-size:18px}
+.diff-pos{color:#15803d;font-weight:500}
+.diff-neg{color:#b91c1c;font-weight:500}
+.diff-zero{color:var(--color-text-tertiary)}
+.detail-panel{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px;margin:10px 0;border:0.5px solid #93c5fd;display:none}
+.detail-panel.open{display:block}
+.mini-game{display:inline-block;text-align:center;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:6px 8px;margin:3px;min-width:72px}
+.mini-win{border-color:#86efac;background:#f0fdf4}
+.mini-loss{border-color:#fca5a5;background:#fef2f2}
+.mini-draw{border-color:#fde68a;background:#fffbeb}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#1e3a8a;color:white;border-color:#1e3a8a}
+.btn-primary:hover{background:#1e40af}
+.btn-green{background:#15803d;color:white;border-color:#15803d}
+.btn-green:hover{background:#166534}
+.btn-red{color:#b91c1c;border-color:#fca5a5}
+.btn-red:hover{background:#fef2f2}
+.export-section{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;margin:10px 12px}
+.step-label{font-size:11px;font-weight:500;color:#1e40af;background:#dbeafe;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:8px}
+.url-input{width:100%;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;font-size:12px;font-family:monospace;color:var(--color-text-primary);background:var(--color-background-primary);outline:none;margin:8px 0}
+.url-input:focus{border-color:#3b82f6}
+.code-block{background:#0f172a;border-radius:8px;padding:14px;font-size:10.5px;font-family:'Courier New',monospace;color:#7dd3fc;overflow-x:auto;white-space:pre;line-height:1.6;margin:8px 0;position:relative}
+.instructions{background:#f0fdf4;border:0.5px solid #86efac;border-radius:8px;padding:12px;font-size:12px;color:#166534;line-height:1.9;margin:8px 0}
+.instructions b{font-weight:500}
+.progress-bar{height:4px;background:var(--color-border-tertiary);border-radius:4px;overflow:hidden;margin:8px 12px 0}
+.progress-fill{height:100%;background:#3b82f6;border-radius:4px;transition:width 0.4s}
+.progress-fill.done{background:#15803d}
+.header-area{padding:14px 12px 10px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.winner-banner{background:#1e3a8a;color:white;border-radius:var(--border-radius-lg);padding:22px;text-align:center;margin-top:10px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:10px 18px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+.pane{display:none}.pane.active{display:block}
+.gas-copy-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.1);color:#7dd3fc;border:0.5px solid rgba(255,255,255,0.2);border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit}
+.criteria-chip{display:inline-block;background:#dbeafe;color:#1e40af;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500}
+</style>
+
+<h2 class="sr-only">BMW 배드민턴 자체대회 4조 점수 관리 앱</h2>
+
+<div class="header-area">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-size:16px;font-weight:500">🏸 BMW 배드민턴 자체대회</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">4조 복식 리그 · 14경기 · 인당 7경기 · 최대 <b>15점</b></div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:20px;font-weight:500" id="done-count">0<span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">/14</span></div>
+      <div style="font-size:11px;color:var(--color-text-secondary)">완료</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('games',this)">🎮 경기 입력</button>
+  <button class="tab-btn" onclick="switchTab('standings',this)">📊 순위표</button>
+  <button class="tab-btn" onclick="switchTab('export',this)">📤 내보내기</button>
+</div>
+
+<div id="pane-games" class="pane active">
+  <div class="game-grid" id="game-grid"></div>
+</div>
+
+<div id="pane-standings" class="pane">
+  <div style="padding:10px 12px">
+    <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th style="width:44px">순위</th>
+            <th>선수</th>
+            <th>경기</th>
+            <th style="color:#86efac">승</th>
+            <th style="color:#fca5a5">패</th>
+            <th style="color:#fde68a">득실차</th>
+            <th>득/실</th>
+          </tr>
+        </thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </div>
+    <div id="detail-panel" class="detail-panel"></div>
+    <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-top:10px">
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:2">
+        <span style="font-weight:500;color:var(--color-text-primary)">순위 기준</span>
+        &nbsp;<span class="criteria-chip">득실차 (득점 − 실점)</span>&nbsp;높은 선수가 상위<br>
+        <span style="color:#15803d;font-weight:500">🏆 최종 1위: 셔틀콕 1통 증정!</span>
+      </div>
+    </div>
+    <div id="winner-area"></div>
+  </div>
+</div>
+
+<div id="pane-export" class="pane">
+  <div class="export-section">
+    <div class="step-label">Step 1</div>
+    <div style="font-weight:500;font-size:14px;margin-bottom:6px">CSV 내보내기</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:10px">경기 결과와 순위를 CSV로 복사합니다. Google Sheets에서 A1 선택 후 Ctrl+V 붙여넣기하세요.</div>
+    <button class="btn btn-primary" onclick="copyCSV()"><i class="ti ti-clipboard" aria-hidden="true"></i> CSV 복사하기</button>
+  </div>
+  <div class="export-section">
+    <div class="step-label">Step 2</div>
+    <div style="font-weight:500;font-size:14px;margin-bottom:6px">Google Sheets 실시간 연동</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:6px">Apps Script Web App URL 입력 시 버튼 하나로 자동 동기화됩니다.</div>
+    <input type="url" class="url-input" id="gs-url" placeholder="https://script.google.com/macros/s/.../exec" />
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-green" onclick="syncSheets()"><i class="ti ti-refresh" aria-hidden="true"></i> Sheets 동기화</button>
+      <button class="btn" onclick="toggleScript()" id="script-toggle-btn"><i class="ti ti-code" aria-hidden="true"></i> Apps Script 코드 보기</button>
+    </div>
+    <div id="script-panel" style="display:none;margin-top:12px">
+      <div class="instructions">
+        <b>① </b>Google Sheets 열기 → 상단 <b>확장 프로그램 → Apps Script</b><br>
+        <b>② </b>편집기 코드 전부 삭제 → 아래 코드 붙여넣기 → <b>Ctrl+S 저장</b><br>
+        <b>③ </b>상단 <b>[배포] → [새 배포]</b> → 유형: <b>웹 앱</b> 선택<br>
+        <b>④ </b>실행: <b>나</b> / 액세스 권한: <b>모든 사용자</b> → <b>[배포]</b><br>
+        <b>⑤ </b>생성된 <b>웹 앱 URL</b> 복사 → 위 입력란에 붙여넣기
+      </div>
+      <div style="position:relative">
+        <div class="code-block" id="gas-code-block"></div>
+        <button class="gas-copy-btn" onclick="copyGasCode()">복사</button>
+      </div>
+    </div>
+  </div>
+  <div class="export-section">
+    <div style="font-weight:500;font-size:14px;color:#b91c1c;margin-bottom:6px">⚠️ 데이터 초기화</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">모든 점수가 삭제됩니다. 되돌릴 수 없습니다.</div>
+    <div id="reset-area">
+      <button class="btn btn-red" onclick="showResetConfirm()"><i class="ti ti-trash" aria-hidden="true"></i> 전체 초기화</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PLAYERS={A:"정규돈",B:"박병규",C:"김형재",D:"김형곤",E:"김태서",F:"김인종",G:"김기주",H:"박재우"};
+const GAMES=[
+  {id:1,t1:["A","B"],t2:["C","D"]},{id:2,t1:["E","F"],t2:["G","H"]},
+  {id:3,t1:["A","C"],t2:["B","D"]},{id:4,t1:["E","G"],t2:["F","H"]},
+  {id:5,t1:["A","D"],t2:["B","C"]},{id:6,t1:["E","H"],t2:["F","G"]},
+  {id:7,t1:["A","E"],t2:["B","F"]},{id:8,t1:["C","G"],t2:["D","H"]},
+  {id:9,t1:["A","F"],t2:["B","G"]},{id:10,t1:["C","H"],t2:["B","E"]},
+  {id:11,t1:["A","G"],t2:["B","H"]},{id:12,t1:["C","E"],t2:["D","F"]},
+  {id:13,t1:["A","H"],t2:["D","E"]},{id:14,t1:["C","F"],t2:["D","G"]}
+];
+const GAS=`function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let gs = ss.getSheetByName("경기결과") || ss.insertSheet("경기결과");
+    gs.clearContents();
+    const gh = [["경기","팀1","팀1득점","팀2","팀2득점","승자","업데이트"]];
+    d.games.forEach(g => gh.push(
+      [g.id+"경기",g.team1,g.score1,g.team2,g.score2,g.winner,d.updatedAt]
+    ));
+    gs.getRange(1,1,gh.length,7).setValues(gh);
+    gs.getRange(1,1,1,7).setFontWeight("bold")
+      .setBackground("#1e3a8a").setFontColor("white");
+    let rs = ss.getSheetByName("순위표") || ss.insertSheet("순위표");
+    rs.clearContents();
+    const rh = [["순위","선수","경기","승","패","득점","실점","득실차"]];
+    d.standings.forEach(s => rh.push(
+      [s.rank,s.name,s.games,s.wins,s.losses,s.pf,s.pa,s.diff]
+    ));
+    rs.getRange(1,1,rh.length,8).setValues(rh);
+    rs.getRange(1,1,1,8).setFontWeight("bold")
+      .setBackground("#1e3a8a").setFontColor("white");
+    if(rh.length>1) rs.getRange(2,1,1,8).setBackground("#fef9c3");
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:false,error:err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+const MAX_SCORE = 15;
+let scores={};
+let detailPlayer=null;
+let gsUrl="";
+
+const getWinner=(s1,s2)=>{
+  if(s1==null||s2==null||s1===""||s2==="") return null;
+  const n1=+s1,n2=+s2;
+  if(isNaN(n1)||isNaN(n2)) return null;
+  return n1>n2?"t1":n2>n1?"t2":"draw";
+};
+
+const calcStandings=()=>{
+  const st={};
+  "ABCDEFGH".split("").forEach(p=>{
+    st[p]={p,name:PLAYERS[p],g:0,w:0,l:0,d:0,pf:0,pa:0};
+  });
+  GAMES.forEach(game=>{
+    const r=scores[game.id];
+    if(!r) return;
+    const w=getWinner(r.s1,r.s2);
+    if(!w) return;
+    const n1=+r.s1,n2=+r.s2;
+    game.t1.forEach(p=>{
+      st[p].g++;st[p].pf+=n1;st[p].pa+=n2;
+      if(w==="t1")st[p].w++;else if(w==="t2")st[p].l++;else st[p].d++;
+    });
+    game.t2.forEach(p=>{
+      st[p].g++;st[p].pf+=n2;st[p].pa+=n1;
+      if(w==="t2")st[p].w++;else if(w==="t1")st[p].l++;else st[p].d++;
+    });
+  });
+  return Object.values(st)
+    .map(s=>({...s,diff:s.pf-s.pa}))
+    .sort((a,b)=>b.diff-a.diff);
+};
+
+const toast=(msg,dur=3000)=>{
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),dur);
+};
+
+const saveScores=async()=>{
+  try{await window.storage.set("bmw4_scores",JSON.stringify(scores));}catch{}
+};
+
+const updateProgress=()=>{
+  const done=GAMES.filter(g=>{const r=scores[g.id];return r&&getWinner(r.s1,r.s2)!==null;}).length;
+  document.getElementById("done-count").innerHTML=`${done}<span style="font-size:12px;font-weight:400;color:var(--color-text-secondary)">/14</span>`;
+  const p=document.getElementById("prog");
+  p.style.width=`${(done/14)*100}%`;
+  if(done===14)p.classList.add("done");else p.classList.remove("done");
+};
+
+// 팀 박스 HTML 생성 (재사용)
+const teamBoxHTML=(game,side)=>{
+  const players=game[side];
+  const r=scores[game.id]||{};
+  const w=getWinner(r.s1,r.s2);
+  const field=side==="t1"?"s1":"s2";
+  const otherField=side==="t1"?"s2":"s1";
+  const tagCls=side==="t1"?"t1-tag":"t2-tag";
+  const isWon=w===side;
+  const isMax=(r[field]==="15"||r[field]===15);
+
+  return `<div class="team-box${isWon?" won":""}">
+    <div style="margin-bottom:4px">
+      ${players.map(p=>`<span class="player-tag ${tagCls}">${p}</span>`).join("")}
+    </div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px">
+      ${players.map(p=>PLAYERS[p]).join(" & ")}
+    </div>
+    <div class="score-row">
+      <input
+        class="score-input${isWon?" win-score":""}"
+        type="number" min="0" max="${MAX_SCORE}"
+        value="${r[field]??""}"
+        placeholder="0"
+        oninput="handleInput(${game.id},'${field}',this.value)"
+      />
+      <button
+        class="btn-15${isMax?" active-15":""}"
+        onclick="setMax(${game.id},'${field}')"
+        title="15점 바로 입력"
+      >15</button>
+    </div>
+  </div>`;
+};
+
+const renderGameCard=(game)=>{
+  const r=scores[game.id]||{};
+  const w=getWinner(r.s1,r.s2);
+  let statusBadge="";
+  if(w==="t1")statusBadge=`<span class="badge badge-win">${game.t1.join("")} 팀 승 ✓</span>`;
+  else if(w==="t2")statusBadge=`<span class="badge badge-win">${game.t2.join("")} 팀 승 ✓</span>`;
+  else if(w==="draw")statusBadge=`<span class="badge badge-draw">무승부</span>`;
+  return `<div class="card${w?" done":""}" id="card-${game.id}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span class="badge badge-game">${game.id}경기</span>
+      ${statusBadge}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      ${teamBoxHTML(game,"t1")}
+      <div class="vs-text">VS</div>
+      ${teamBoxHTML(game,"t2")}
+    </div>
+  </div>`;
+};
+
+// 15점 버튼 클릭 — 이미 15면 지우고, 아니면 15로 세팅
+function setMax(gameId, field){
+  if(!scores[gameId]) scores[gameId]={};
+  const cur=scores[gameId][field];
+  scores[gameId][field]=(cur==="15"||cur===15||+cur===15)?"":"15";
+  refreshCard(gameId);
+  saveScores();
+}
+
+// 숫자 직접 입력
+function handleInput(gameId, field, val){
+  if(val===""){
+    if(!scores[gameId]) scores[gameId]={};
+    scores[gameId][field]="";
+    refreshCard(gameId);saveScores();return;
+  }
+  const n=parseInt(val,10);
+  if(isNaN(n)||n<0) return;
+  const clamped=Math.min(n,MAX_SCORE);
+  if(!scores[gameId]) scores[gameId]={};
+  scores[gameId][field]=String(clamped);
+  // 15 초과 입력 시 값 보정
+  if(n>MAX_SCORE) toast(`최대 ${MAX_SCORE}점까지 입력 가능합니다.`);
+  refreshCard(gameId);saveScores();
+}
+
+function refreshCard(gameId){
+  const card=document.getElementById(`card-${gameId}`);
+  if(card){const game=GAMES.find(g=>g.id===gameId);card.outerHTML=renderGameCard(game);}
+  updateProgress();
+  renderStandings();
+}
+
+const renderStandings=()=>{
+  const st=calcStandings();
+  const medals=["🥇","🥈","🥉"];
+  const body=document.getElementById("standings-body");
+  if(!body) return;
+  body.innerHTML=st.map((s,i)=>{
+    const diffCls=s.diff>0?"diff-pos":s.diff<0?"diff-neg":"diff-zero";
+    const diffStr=s.diff>0?`+${s.diff}`:s.diff;
+    return `<tr class="${i===0?"gold":""}" style="cursor:pointer" onclick="toggleDetail('${s.p}')" title="클릭하면 개인 전적 보기">
+      <td><span class="rank-medal">${medals[i]||`${i+1}`}</span></td>
+      <td>
+        <span style="font-weight:500;color:${i===0?"#b45309":""}">${s.name}</span>
+        <span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);margin-left:5px;font-size:10px">${s.p}</span>
+      </td>
+      <td style="color:var(--color-text-secondary)">${s.g}</td>
+      <td style="color:#15803d;font-weight:500">${s.w}</td>
+      <td style="color:#b91c1c">${s.l}</td>
+      <td class="${diffCls}" style="font-size:15px;font-weight:500">${diffStr}</td>
+      <td style="font-size:11px;color:var(--color-text-secondary)">${s.pf}/${s.pa}</td>
+    </tr>`;
+  }).join("");
+
+  const done=GAMES.filter(g=>{const r=scores[g.id];return r&&getWinner(r.s1,r.s2)!==null;}).length;
+  const wa=document.getElementById("winner-area");
+  if(!wa) return;
+  if(done===14&&st.length>0){
+    const top=st[0];
+    wa.innerHTML=`<div class="winner-banner">
+      <div style="font-size:40px">🏆</div>
+      <div style="font-size:22px;font-weight:500;margin-top:8px">${top.name} 우승!</div>
+      <div style="font-size:13px;opacity:0.8;margin-top:4px">득실차 ${top.diff>=0?"+":""}${top.diff} · ${top.w}승 ${top.l}패</div>
+      <div style="margin-top:14px;background:rgba(255,255,255,0.15);border-radius:8px;padding:10px 18px;display:inline-block;font-size:14px">🎁 상품: 셔틀콕 1통</div>
+    </div>`;
+  } else {
+    wa.innerHTML="";
+  }
+  if(detailPlayer) renderDetail(detailPlayer,st);
+};
+
+const renderDetail=(player,st)=>{
+  const panel=document.getElementById("detail-panel");
+  if(!panel) return;
+  const ps=st.find(s=>s.p===player);
+  if(!ps){panel.innerHTML="";panel.classList.remove("open");return;}
+  const playerGames=GAMES.filter(g=>[...g.t1,...g.t2].includes(player)).map(g=>{
+    const r=scores[g.id]||{};
+    const isT1=g.t1.includes(player);
+    const w=getWinner(r.s1,r.s2);
+    const myScore=isT1?r.s1:r.s2;
+    const opScore=isT1?r.s2:r.s1;
+    const res=!w?null:(w==="draw"?"D":(isT1&&w==="t1")||(!isT1&&w==="t2")?"W":"L");
+    const partner=(isT1?g.t1:g.t2).find(p=>p!==player);
+    return{id:g.id,res,myScore,opScore,partner};
+  });
+  const miniCards=playerGames.map(g=>{
+    const cls=!g.res?"mini-game":g.res==="W"?"mini-game mini-win":g.res==="L"?"mini-game mini-loss":"mini-game mini-draw";
+    const resLabel=g.res==="W"?"✅ 승":g.res==="L"?"❌ 패":g.res==="D"?"⚖️ 무":"—";
+    const scoreStr=g.res?`${g.myScore}:${g.opScore}`:"미입력";
+    const diff=g.res&&g.myScore!=null&&g.opScore!=null?(+g.myScore-+g.opScore):null;
+    const diffStr=diff!==null?(diff>0?`+${diff}`:diff):"";
+    return `<div class="${cls}">
+      <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px">${g.id}경기</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary)">파트너: ${PLAYERS[g.partner]}</div>
+      <div style="font-size:14px;font-weight:500;margin:3px 0">${scoreStr}</div>
+      <div style="font-size:11px">${resLabel}${diffStr?` <span style="font-size:10px">(${diffStr})</span>`:""}</div>
+    </div>`;
+  }).join("");
+  panel.innerHTML=`<div style="font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px">${PLAYERS[player]} (${player}) 개인 전적 · 누적 득실차 <span style="${ps.diff>=0?"color:#15803d":"color:#b91c1c"}">${ps.diff>=0?"+":""}${ps.diff}</span></div>
+    <div style="flex-wrap:wrap;display:flex">${miniCards}</div>`;
+  panel.classList.add("open");
+};
+
+function toggleDetail(player){
+  detailPlayer=detailPlayer===player?null:player;
+  renderStandings();
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById(`pane-${id}`).classList.add("active");
+  btn.classList.add("active");
+  if(id==="standings")renderStandings();
+}
+
+function buildData(){
+  const st=calcStandings();
+  return{
+    tournament:"BMW 자체대회 4조",
+    updatedAt:new Date().toLocaleString("ko-KR"),
+    games:GAMES.map(g=>{
+      const r=scores[g.id]||{};
+      const w=getWinner(r.s1,r.s2);
+      return{id:g.id,team1:g.t1.map(p=>PLAYERS[p]).join(" & "),score1:r.s1??"",
+        team2:g.t2.map(p=>PLAYERS[p]).join(" & "),score2:r.s2??"",
+        winner:w==="t1"?g.t1.map(p=>PLAYERS[p]).join(" & "):w==="t2"?g.t2.map(p=>PLAYERS[p]).join(" & "):w==="draw"?"무승부":"-"};
+    }),
+    standings:st.map((s,i)=>({rank:i+1,name:s.name,games:s.g,wins:s.w,losses:s.l,draws:s.d,pf:s.pf,pa:s.pa,diff:s.diff}))
+  };
+}
+
+function copyCSV(){
+  const d=buildData();
+  let csv=`${d.tournament} - ${d.updatedAt}\n순위 기준: 득실차 / 최대 15점\n\n`;
+  csv+=`경기,팀1,팀1득점,팀2,팀2득점,승자\n`;
+  d.games.forEach(g=>{csv+=`${g.id}경기,${g.team1},${g.score1},${g.team2},${g.score2},${g.winner}\n`;});
+  csv+=`\n순위,선수,경기,승,패,득점,실점,득실차\n`;
+  d.standings.forEach(s=>{csv+=`${s.rank},${s.name},${s.games},${s.wins},${s.losses},${s.pf},${s.pa},${s.diff>=0?"+":""}${s.diff}\n`;});
+  navigator.clipboard.writeText(csv)
+    .then(()=>toast("✅ CSV 복사 완료! Google Sheets에 Ctrl+V 하세요."))
+    .catch(()=>toast("❌ 복사 실패"));
+}
+
+async function syncSheets(){
+  const url=(document.getElementById("gs-url").value||gsUrl).trim();
+  if(!url){toast("⚠️ Google Apps Script URL을 입력하세요.");return;}
+  toast("🔄 동기화 중...",8000);
+  try{
+    await window.storage.set("bmw4_gsurl",url);
+    gsUrl=url;
+    const res=await fetch(url,{method:"POST",body:JSON.stringify(buildData()),headers:{"Content-Type":"application/json"}});
+    const j=await res.json();
+    j.ok?toast("✅ Google Sheets 동기화 완료!"):toast(`❌ 오류: ${j.error}`);
+  }catch{toast("❌ 연결 실패. URL/배포 설정을 확인하세요.");}
+}
+
+function toggleScript(){
+  const p=document.getElementById("script-panel");
+  const b=document.getElementById("script-toggle-btn");
+  const open=p.style.display==="none";
+  p.style.display=open?"block":"none";
+  b.innerHTML=open?`<i class="ti ti-code" aria-hidden="true"></i> Apps Script 코드 닫기`:`<i class="ti ti-code" aria-hidden="true"></i> Apps Script 코드 보기`;
+}
+function copyGasCode(){
+  navigator.clipboard.writeText(GAS).then(()=>toast("✅ Apps Script 코드 복사됨!")).catch(()=>{});
+}
+function showResetConfirm(){
+  document.getElementById("reset-area").innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:13px;color:#b91c1c">정말 삭제할까요?</span>
+      <button class="btn" style="background:#b91c1c;color:white;border-color:#b91c1c" onclick="doReset()">삭제</button>
+      <button class="btn" onclick="cancelReset()">취소</button>
+    </div>`;
+}
+function cancelReset(){
+  document.getElementById("reset-area").innerHTML=`<button class="btn btn-red" onclick="showResetConfirm()"><i class="ti ti-trash" aria-hidden="true"></i> 전체 초기화</button>`;
+}
+async function doReset(){
+  scores={};
+  try{await window.storage.set("bmw4_scores","{}");}catch{}
+  cancelReset();
+  document.getElementById("game-grid").innerHTML=GAMES.map(renderGameCard).join("");
+  updateProgress();renderStandings();
+  toast("🔄 초기화 완료");
+}
+
+async function init(){
+  document.getElementById("gas-code-block").textContent=GAS;
+  try{const s=await window.storage.get("bmw4_scores");if(s)scores=JSON.parse(s.value);}catch{}
+  try{const u=await window.storage.get("bmw4_gsurl");if(u){gsUrl=u.value;document.getElementById("gs-url").value=u.value;}}catch{}
+  document.getElementById("game-grid").innerHTML=GAMES.map(renderGameCard).join("");
+  updateProgress();
+}
+init();
+</script>
